@@ -19,19 +19,25 @@ def login():
     for i in cur.fetchall():
         if i[2]==pwd:
             print("login successfull!")
+            return i[0]
         else:
             print("username or password incorrect")
+            return None
 def signup():
     username=input("select a username")
     pwd=input("select a password")
     query=('''insert into user_info (username,password)
            values('{}','{}') '''.format(username,pwd))
     cur.execute(query)
-    print("new account successful! login successful!")
-if var==1:
+    con.commit()
+    print("new account successful!")
+    print("continue loging in")
     login()
+if var==1:
+    u_id=login()
 elif var==2:
-    signup()
+    u_id=signup()
+con.close()
         
         
 
