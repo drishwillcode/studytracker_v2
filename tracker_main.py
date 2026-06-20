@@ -79,10 +79,12 @@ def day_till_ex():
         date=i[3]
         time_left=(date-date.today()).days
     print(f"There are {time_left} days left for {name}")
-    if(time_left<=30):
+    if(time_left<=30 and time_left>0):
         print("Its time study hard!!!")
     elif(time_left>=60 and time_left<=90):
         print("you still have some time! keep going, you got it!")
+    elif(time_left<=0):
+        print("exam ended", (-1)*time_left, "days ago!!!")
     else:
         print("you have plenty time. just be consistent!")
                 
