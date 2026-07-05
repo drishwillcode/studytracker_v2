@@ -35,11 +35,12 @@ def signup():
     print("new account successful!")
     print("continue loging in")
     login()
+    
 if var==1:
     u_id=login()
 elif var==2:
-    u_id=signup()   
-con.close()
+    u_id=signup()
+    cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
 
 #----FUNCTION TO TRACK EXAMS----
 #----add a new exam----
@@ -88,5 +89,41 @@ def day_till_ex():
     else:
         print("you have plenty time. just be consistent!")
                 
-        
+ #---FUNCTION TO DISPLAY LIST OF CHAPTERS---
+def chap_list():
+        ch_options={1:'all chapters',
+                    2:'completed chapters',
+                    3:'pending chapters',
+                    4:'mathematics chapters',
+                    5:'physics chapters',
+                    6:'chemistry chapters'}
+        for i in ch_options:
+            print(i,"  :      ",ch_options[i])
+        pref1=int(input("please enter your preference:"))
+        elif(pref1==1):
+            cur.execute('select * from chapters ;')
+            for i in cur.fetchall():
+                print(i)
+        elif(pref1==2):
+            cur.execute("select * from chapters where status='finished' ;")
+            for i in cur.fetchall():
+                print(i)
+        elif(pref1==3):
+            cur.execute("select * from chapters where status='pending' ;")
+            for i in cur.fetchall():
+                print(i)
+        elif(pref1==4):
+            cur.execute("select * from chapters where subject='mathermatics' ;")
+            for i in cur.fetchall():
+                print(i)
+        elif(pref1==5):
+            cur.execute("select * from chapters where subject='physics' ;")
+            for i in cur.fetchall():
+                print(i)
+        elif(pref1==6):
+            cur.execute("select * from chapters where subject='chemistry' ;")
+            for i in cur.fetchall():
+                print(i)
+       
+con.close()
 
