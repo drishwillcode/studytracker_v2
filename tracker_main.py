@@ -40,7 +40,10 @@ if var==1:
     u_id=login()
 elif var==2:
     u_id=signup()
-    cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
+    if u_id==None:
+        pass
+    else:
+        cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
 
 #----FUNCTION TO TRACK EXAMS----
 #----add a new exam----
@@ -100,14 +103,18 @@ def chap_list():
         for i in ch_options:
             print(i,"  :      ",ch_options[i])
         pref1=int(input("please enter your preference:"))
-        elif(pref1==1):
+        if(pref1==1):
             cur.execute('select * from chapters ;')
             for i in cur.fetchall():
                 print(i)
         elif(pref1==2):
-            cur.execute("select * from chapters where status='finished' ;")
-            for i in cur.fetchall():
-                print(i)
+            query=('''select chapters.ch_name
+from chapters
+join ch_progress
+on ch_progress.ch_id=chapters.ch_id
+where ch_progress.status="pending"
+and ch_progress.user_id={}
+'''.format(u_id))
         elif(pref1==3):
             cur.execute("select * from chapters where status='pending' ;")
             for i in cur.fetchall():
