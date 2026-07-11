@@ -94,43 +94,129 @@ def day_till_ex():
                 
  #---FUNCTION TO DISPLAY LIST OF CHAPTERS---
 def chap_list():
-        ch_options={1:'all chapters',
-                    2:'completed chapters',
-                    3:'pending chapters',
-                    4:'mathematics chapters',
-                    5:'physics chapters',
-                    6:'chemistry chapters'}
-        for i in ch_options:
-            print(i,"  :      ",ch_options[i])
-        pref1=int(input("please enter your preference:"))
-        if(pref1==1):
-            cur.execute('select * from chapters ;')
-            for i in cur.fetchall():
-                print(i)
-        elif(pref1==2):
-            query=('''select chapters.ch_name
-from chapters
-join ch_progress
-on ch_progress.ch_id=chapters.ch_id
-where ch_progress.status="pending"
-and ch_progress.user_id={}
-'''.format(u_id))
-        elif(pref1==3):
-            cur.execute("select * from chapters where status='pending' ;")
-            for i in cur.fetchall():
-                print(i)
-        elif(pref1==4):
-            cur.execute("select * from chapters where subject='mathermatics' ;")
-            for i in cur.fetchall():
-                print(i)
-        elif(pref1==5):
-            cur.execute("select * from chapters where subject='physics' ;")
-            for i in cur.fetchall():
-                print(i)
-        elif(pref1==6):
-            cur.execute("select * from chapters where subject='chemistry' ;")
-            for i in cur.fetchall():
-                print(i)
-       
+            ch_options={1:'all chapters',
+                        2:'completed chapters',
+                        3:'pending chapters',
+                        4:'mathematics chapters',
+                        5:'physics chapters',
+                        6:'chemistry chapters'}
+            for i in ch_options:
+                print(i,"  :      ",ch_options[i])
+            pref1=int(input("please enter your preference:"))
+            if(pref1==1):
+                cur.execute('select * from chapters ;')
+                for i in cur.fetchall():
+                    print(i)
+            elif(pref1==2):
+                query=('''select chapters.ch_name
+    from chapters
+    join ch_progress
+    on ch_progress.ch_id=chapters.ch_id
+    where ch_progress.status="finished"
+    and ch_progress.user_id={}
+    ;
+    '''.format(u_id))
+                for i in cur.fetchall():
+                    print(i)
+            elif(pref1==3):
+                cur.execute('''select chapters.ch_name
+    from chapters
+    join ch_progress
+    on ch_progress.ch_id=chapters.ch_id
+    where ch_progress.status="pending"
+    and ch_progress.user_id={}
+    ;
+    '''.format(u_id))
+                for i in cur.fetchall():
+                    print(i)
+            elif(pref1==4):
+                cur.execute('''select chapters.ch_name
+    from chapters
+    join ch_progress
+    on ch_progress.ch_id=chapters.ch_id
+    where chapters.sub="mathematics"
+    and ch_progress.user_id={}
+    ;
+    '''.format(u_id))
+                for i in cur.fetchall():
+                    print(i)
+            elif(pref1==5):
+                cur.execute('''select chapters.ch_name
+    from chapters
+    join ch_progress
+    on ch_progress.ch_id=chapters.ch_id
+    where chapters.sub="physics"
+    and ch_progress.user_id={}
+    ;
+    '''.format(u_id))
+                for i in cur.fetchall():
+                    print(i)
+            elif(pref1==6):
+                cur.execute('''select chapters.ch_name
+    from chapters
+    join ch_progress
+    on ch_progress.ch_id=chapters.ch_id
+    where chapters.sub="chemistry"
+    and ch_progress.user_id={}
+    ;
+    '''.format(u_id))
+                for i in cur.fetchall():
+                    print(i)
+
+
+#---FUNCTION TO INPUT TEST SCORES---
+def insert_score():
+            name=input("what was the name of the test?")
+            date=input("test date? dd-mm-yyy")
+            mark=int(input("what were the maximum marks?"))
+            ttl=int(input("total marks obtained by you?"))
+            phy=int(input("marks obtained in physics?"))
+            pmax=int(input("enter max marks for physics?"))
+            math=int(input("marks obtained in mathematics?"))
+            mmax=int(input("enter max marks for mathematics?"))
+            chem=int(input("marks obtained in chemistry?"))
+            cmax=int(input("enter max marks for chemistry?"))
+            typ=input("test type? (mock, subject, etc)")
+            cur.execute('''insert into tests(user_id,name,date,type)
+    values(%s,'%s','%s','%s')''',(u_id,name,date,typ))
+            con.commit()
+            testid=cur.lastrowid()
+            cur.execute('''insert into test_result(test_id, subject, marks, maxmarks)''')
+
+#---SHOW AVAILABLE FUNCTIONS---
+while True:        
+    print("what would you like to do today?")
+    #available tasks
+    func={1:"edit exam list",
+          2:"show exam list",
+          3:"time remaining till exam" ,
+          4:"show list of chapters",
+          5:"update syllabus completion",
+          6:"insert test scores",
+          7:"show test analysis",
+          8:"show syllabus progress",
+          9:"exit"}
+    for i in func:
+        print(i,"   :        ",func[i])
+    task=int(input("enter the number:\n"))
+    if (task==1):
+        edit_exam()
+        
+    elif(task==2):
+        exam_list()
+        
+    elif(task==3):
+        day_till_ex()
+        
+    elif(task==4):
+        chap_list()
+        
+    elif(task==9):
+        print("study well!\n----------\n")
+        break
+    else:
+        print("invalid input")
+    print("\n----------\n\n")    
+    time.sleep(2)       
 con.close()
 
