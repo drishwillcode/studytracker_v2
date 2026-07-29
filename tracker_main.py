@@ -36,7 +36,7 @@ def signup():
     con.commit()
     print("new account successful!")
     print("continue loging in")
-    login()
+    return login()
     
 if var==1:
     u_id=login()
@@ -56,7 +56,8 @@ elif var==2:
             break
     print(u_id)
     cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
-
+    con.commit()
+    print("executed")
 #----FUNCTION TO TRACK EXAMS----
 #----add a new exam----
 def edit_exam():
@@ -249,7 +250,161 @@ def update_syll():
         print("updated succesfully!")
 
 #---FUNCTION TO SHOW TEST ANALYSIS---
+def test_analysis():
+    #ask which graph/analysis user wants to see
+    ana_options={1:"overall percentage",
+                 2:"physics scores",
+                 3:"chemistry scores",
+                 4:"mathematics score",
+                 5:"all of the above",}
+    for i in ana_options:
+        print(i,"   :      ",ana_options[i])
+    ana_pref=int(input("enter your preference:"))
+    print('----------\n')
+
+     
+    def ana_chem():
+            query1=(f'''select t.name
+        from tests t
+        join test_result tr
+        on t.test_id=tr.test_id
+        where t.user_id={u_id}
+        and t.type='subject'
+        and tr.subject="chemistry";
+        ''')
+            cur.execute(query1)
+            namedata=cur.fetchall()
+            name=[i[0] for i in namedata]
+
+            query2=(f'''select tr.marks,tr.maxmarks
+        from test_result tr
+        join tests t
+        on t.test_id=tr.test_id
+        where tr.subject='chemistry'
+        and t.type='subject'
+        and t.user_id={u_id}
+        ;
+        ''')
+            cur.execute(query2)
+            percdata=cur.fetchall()
+            perc=[i[0]/i[1]*100 for i in percdata]
+
+            plt.title("CHEMISTRY SCORES")
+            plt.xlabel("test name")
+            plt.ylabel("physics percentage")
+            plt.plot(name,perc,marker="o")
+            plt.show()
+
+    def ana_phy():
+          query1=(f'''select t.name
+        from tests t
+        join test_result tr
+        on t.test_id=tr.test_id
+        where t.user_id={u_id}
+        and t.type='subject'
+        and tr.subject="physics";
+        ''')
+          cur.execute(query1)
+          namedata=cur.fetchall()
+          name=[i[0] for i in namedata]
+            
+          query2=(f'''select tr.marks,tr.maxmarks
+        from test_result tr
+        join tests t
+        on t.test_id=tr.test_id
+        where tr.subject='physics'
+        and t.type='subject'
+        and t.user_id={u_id}
+        ;
+        ''')
+          cur.execute(query2)
+          percdata=cur.fetchall()
+          perc=[i[0]/i[1]*100 for i in percdata]
+
+          plt.title("PHYSICS SCORES")
+          plt.xlabel("test name")
+          plt.ylabel("physics percentage")
+          plt.plot(name,perc,marker="o")
+          plt.show()  
+    def ana_math():
+          query1=(f'''select t.name
+        from tests t
+        join test_result tr
+        on t.test_id=tr.test_id
+        where t.user_id={u_id}
+        and t.type='subject'
+        and tr.subject="mathematics";
+        ''')
+          cur.execute(query1)
+          namedata=cur.fetchall()
+          name=[i[0] for i in namedata]
+
+          query2=(f'''select tr.marks,tr.maxmarks
+        from test_result tr
+        join tests t
+        on t.test_id=tr.test_id
+        where tr.subject='mathematics'
+        and t.type='subject'
+        and t.user_id={u_id}
+        ;
+        ''')
+          cur.execute(query2)
+          percdata=cur.fetchall()
+          perc=[i[0]/i[1]*100 for i in percdata]
+
+          plt.title("MATHEMATICS SCORES")
+          plt.xlabel("test name")
+          plt.ylabel("physics percentage")
+          plt.plot(name,perc,marker="o")
+          plt.show()
+    def ana_overall():
+          query=(f'''select t.name,sum(tr.marks),sum(tr.maxmarks)
+        from tests t
+        join test_result tr
+        on t.test_id=tr.test_id
+        where t.user_id={u_id}
+        and t.type="full"
+        group by t.test_id;
+        ''')
+          cur.execute(query)
+          data=cur.fetchall()
+          name=[i[0] for i in data]
+          perc=[i[1]/i[2]*100 for i in data]
+          plt.title("OVERALL SCORES")
+          plt.xlabel("test name")
+          plt.ylabel("percentage")
+          plt.plot(name,perc,marker="o")
+          plt.show()
+          
+    if (ana_pref==1):
+        ana_overall()
+    elif(ana_pref==2):
+        ana_phy()
+    elif(ana_pref==3):
+        ana_chem()
+    elif(ana_pref==4):
+         ana_math()
+    elif(ana_pref==5):
+         ana_overall()
+         ana_phy()
+         ana_chem()
+         ana_math()
+    else:
+        print("wrong input!")
+
         
+#function to show syllabus progress:
+def syll_progress():
+        cur.execute("select count(*) from chapters where status='pending' ")
+        a=cur.fetchone()[0]
+        cur.execute("select count(*) from chapters where status='finished' " )
+        b=cur.fetchone()[0]
+        cur.execute("select count(*) from chapters where status='in progress' ")
+        c=cur.fetchone()[0]
+        y=[a,b,c]
+        lab=["pending",'finished','in progress']
+        plt.pie(y,labels=lab)
+        plt.show()        
 
 #---SHOW AVAILABLE FUNCTIONS---
 while True:        
@@ -284,6 +439,12 @@ while True:
         
     elif(task==6):
         insert_score()
+
+    elif(task==7):
+        test_analysis()
+
+    elif(task==8):
+        syll_progress()  
         
     elif(task==9):
         print("study well!\n----------\n")
