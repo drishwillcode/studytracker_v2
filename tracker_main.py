@@ -1,6 +1,9 @@
 import pymysql
 import time
 import datetime
+import matplotlib.pyplot as plt
+
+
 #---CREATE A CONNECTION---
 con=pymysql.connect(
     host='localhost',
@@ -23,8 +26,7 @@ def login():
             print("login successfull!")
             return i[0]
         else:
-            print("username or password incorrect")
-            return None
+           pass
 def signup():
     username=input("select a username")
     pwd=input("select a password")
@@ -38,12 +40,22 @@ def signup():
     
 if var==1:
     u_id=login()
+    while u_id==None:
+        print("incorrect username or password, try again")
+        u_id=login()
+        if u_id!=None:
+            break
+        
+    print(u_id)
 elif var==2:
     u_id=signup()
-    if u_id==None:
-        pass
-    else:
-        cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
+    while u_id==None:
+        print("incorrect username or password, try again")
+        u_id=login()
+        if u_id!=None:
+            break
+    print(u_id)
+    cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
 
 #----FUNCTION TO TRACK EXAMS----
 #----add a new exam----
@@ -166,22 +178,78 @@ def chap_list():
 
 #---FUNCTION TO INPUT TEST SCORES---
 def insert_score():
-            name=input("what was the name of the test?")
-            date=input("test date? dd-mm-yyy")
-            mark=int(input("what were the maximum marks?"))
-            ttl=int(input("total marks obtained by you?"))
-            phy=int(input("marks obtained in physics?"))
-            pmax=int(input("enter max marks for physics?"))
-            math=int(input("marks obtained in mathematics?"))
-            mmax=int(input("enter max marks for mathematics?"))
-            chem=int(input("marks obtained in chemistry?"))
-            cmax=int(input("enter max marks for chemistry?"))
-            typ=input("test type? (mock, subject, etc)")
-            cur.execute('''insert into tests(user_id,name,date,type)
-    values(%s,'%s','%s','%s')''',(u_id,name,date,typ))
+    name=input('enter name of your test/exam:')
+    typ=input("enter test type (full OR subject)")
+    date=input("enter date of test(yyyy-mm-dd)")
+    cur.execute("insert into tests(user_id,name,date,type) values(%s,%s,%s,%s)",(u_id,name,date,typ))
+    con.commit()
+    print("saved in test")
+    testid=cur.lastrowid
+    while True:
+        print("~enter details of the subjects")
+        sub=input("enter subject name (press enter to end):")
+        if (sub==""):
+            break
+        else:
+            maxx=int(input("enter maximum marks:"))
+            ob=int(input("enter marks obtained by you:"))
+            cur.execute('''insert into test_result(test_id, subject, marks, maxmarks)
+            values(%s,%s,%s,%s)''',(testid,sub,ob,maxx))
             con.commit()
-            testid=cur.lastrowid()
-            cur.execute('''insert into test_result(test_id, subject, marks, maxmarks)''')
+            print("saved in test result wala")
+
+
+#---FUNCTION TO UPDATE SYLLABUS---
+def update_syll():
+        def finished():
+            ch=input("enter chapter ids you have finished. eg. 2,3,41")
+            lst=ch.split(",")
+            ch_lst=[]
+            for i in lst:
+                ch_lst.append(int(i)) 
+            for j in ch_lst:     
+                cur.execute("update ch_progress set status='FINISHED' where ch_id in (%s) and user_id=(%s) ;",(j,u_id)) 
+                con.commit()
+        def in_progress():
+            ch=input("enter chapter numbers og the chapters in progress. eg. 2,3,41")
+            lst=ch.split(",")
+            ch_lst=[]
+            for i in lst:
+                ch_lst.append(int(i)) 
+            for j in ch_lst:     
+                cur.execute("update ch_progress set status='IN PROGRESS' where ch_id in (%s) and user_id=(%s) ;",(j,u_id))
+                con.commit()
+        def pending():
+            ch=input("enter chapter numbers of pending chapters. eg. 2,3,41")
+            lst=ch.split(",")
+            ch_lst=[]
+            for i in lst:
+                ch_lst.append(int(i)) 
+            for j in ch_lst:     
+                cur.execute("update ch_progress set status='PENDING' where ch_id in (%s) and user_id=(%s) ;",(j,u_id)) 
+                con.commit()
+        updt_options={1:"update completed chapters ",
+                   2:"update chapters in progress",
+                   3:"update pending chapters ",
+                       4:"finish updating syllabus progress"}
+        for i in updt_options:
+             print(i,"  :      ",updt_options[i])
+        while True:    
+             updt_pref=int(input("enter your preference:"))
+             if updt_pref==1:
+                 finished()
+             elif updt_pref==2:
+                 in_progress()
+             elif updt_pref==3:
+                 pending()
+             elif updt_pref==4:
+                 break
+             else:
+                 print("invalid input ")
+        print("updated succesfully!")
+
+#---FUNCTION TO SHOW TEST ANALYSIS---
+        
 
 #---SHOW AVAILABLE FUNCTIONS---
 while True:        
@@ -211,12 +279,20 @@ while True:
     elif(task==4):
         chap_list()
         
+    elif(task==5):
+        update_syll()
+        
+    elif(task==6):
+        insert_score()
+        
     elif(task==9):
         print("study well!\n----------\n")
+        
         break
     else:
         print("invalid input")
     print("\n----------\n\n")    
-    time.sleep(2)       
+    time.sleep(2)
+    
 con.close()
 
