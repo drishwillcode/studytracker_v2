@@ -58,6 +58,7 @@ elif var==2:
     cur.execute("insert into ch_progress(user_id, ch_id) select {}, ch_id from chapters".format(u_id))
     con.commit()
     print("executed")
+    
 #----FUNCTION TO TRACK EXAMS----
 #----add a new exam----
 def edit_exam():
@@ -395,16 +396,16 @@ def test_analysis():
         
 #function to show syllabus progress:
 def syll_progress():
-        cur.execute("select count(*) from chapters where status='pending' ")
+        cur.execute(f"select count(*) from ch_progress where status='pending' and user_id={u_id};")
         a=cur.fetchone()[0]
-        cur.execute("select count(*) from chapters where status='finished' " )
+        cur.execute(f"select count(*) from ch_progress where status='finished' and user_id={u_id}; " )
         b=cur.fetchone()[0]
-        cur.execute("select count(*) from chapters where status='in progress' ")
+        cur.execute(f"select count(*) from ch_progress where status='in progress' and user_id={u_id};")
         c=cur.fetchone()[0]
         y=[a,b,c]
         lab=["pending",'finished','in progress']
         plt.pie(y,labels=lab)
-        plt.show()        
+        plt.show()
 
 #---SHOW AVAILABLE FUNCTIONS---
 while True:        
